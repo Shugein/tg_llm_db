@@ -1,0 +1,17 @@
+# This file is for compatibility with older deployment systems
+# Primary dependency management is done via pyproject.toml
+# To generate this file, run: poetry export -f requirements.txt --output requirements.txt
+
+aiogram>=3.21.0
+python-dotenv>=1.0.0
+aiohttp>=3.9.0
+redis>=5.0.0
+sqlalchemy>=2.0.0
+alembic>=1.13.0
+pydantic>=2.7.0
+loguru>=0.7.2
+prometheus-client>=0.20.0
+celery>=5.3.0
+asyncpg>=0.29.0
+uvicorn>=0.29.0
+fastapi>=0.111.0

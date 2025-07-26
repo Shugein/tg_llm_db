@@ -1,0 +1,14 @@
+[Unit]
+Description=Telegram LLM Bot
+After=network.target docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=true
+WorkingDirectory=/opt/telegram-bot
+ExecStart=/usr/local/bin/docker-compose -f docker-compose.prod.yml up -d
+ExecStop=/usr/local/bin/docker-compose -f docker-compose.prod.yml down
+ExecReload=/usr/local/bin/docker-compose -f docker-compose.prod.yml restart bot
+
+[Install]
+WantedBy=multi-user.target
