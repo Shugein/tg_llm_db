@@ -10,7 +10,9 @@ from .config import settings
 from .handlers import setup_routers
 from .middlewares import setup_middlewares
 from .services.context import ConversationManager
+from .services.llm import LLMService
 from .database.database import init_database
+from .handlers import callbacks
 
 async def create_bot() -> Bot:
     """Создание экземпляра бота"""
@@ -53,6 +55,16 @@ async def main():
         # Инициализация менеджера контекста
         conversation_manager = ConversationManager()
         await conversation_manager.initialize()
+        
+        # Инициализация LLM сервиса
+        llm_service = LLMService(conversation_manager)
+        
+        # Инициализируем глобальные переменные в модулях
+        from .services import llm as llm_module
+        from .handlers import callbacks as callbacks_module
+        
+        llm_module.llm_service = llm_service
+        callbacks_module.conversation_manager = conversation_manager
         
         # Создание бота и диспетчера
         bot = await create_bot()

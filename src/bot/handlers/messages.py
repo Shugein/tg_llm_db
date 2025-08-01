@@ -3,7 +3,7 @@ from aiogram import Router, F
 from aiogram.types import Message
 from loguru import logger
 
-from ..services.llm import llm_service
+from ..services import llm as llm_module
 
 router = Router(name="messages")
 
@@ -19,8 +19,24 @@ async def handle_text_message(message: Message):
     await message.bot.send_chat_action(message.chat.id, "typing")
     
     try:
-        # Получаем ответ от LLM
-        ai_response = await llm_service.process_message(user_id, user_text)
+        # Проверяем, что LLM сервис инициализирован
+        if llm_module.llm_service is None:
+            await message.answer("Сервис AI временно недоступен. Попробуйте позже.")
+            return
+        
+        # Генерируем ответ через LLM сервис
+        result = await llm_module.llm_service.generate_response(
+            user_id=user_id,
+            user_message=user_text,
+            telegram_user=message.from_user
+        )
+        
+        if not result["success"]:
+            await message.answer("Извините, произошла ошибка при обработке вашего сообщения.")
+            logger.error(f"Failed to generate response: {result.get('error')}")
+            return
+        
+        ai_response = result["response"]
         
         # Отправляем ответ (разбивая если необходимо)
         if len(ai_response) <= 4096:

@@ -1,6 +1,7 @@
 import os
 from typing import List, Optional
-from pydantic import BaseSettings, SecretStr, validator
+from pydantic import SecretStr, field_validator
+from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     """Конфигурация приложения с валидацией"""
@@ -40,13 +41,15 @@ class Settings(BaseSettings):
         env_file = ".env"
         case_sensitive = False
     
-    @validator('allowed_user_ids')
+    @field_validator('allowed_user_ids')
+    @classmethod
     def parse_allowed_users(cls, v):
         if not v:
             return []
         return [int(user_id.strip()) for user_id in v.split(',')]
     
-    @validator('telegram_bot_token', 'openrouter_api_key', 'secret_key')
+    @field_validator('telegram_bot_token', 'openrouter_api_key', 'secret_key')
+    @classmethod
     def validate_secrets(cls, v):
         if not v or len(v.get_secret_value()) < 10:
             raise ValueError('Secret is too short or empty')
