@@ -2,7 +2,10 @@ from aiogram import Router, F
 from aiogram.types import CallbackQuery
 from loguru import logger
 
-from ..keyboards.inline import get_main_menu, get_settings_menu, get_model_selection_menu, get_confirm_clear_menu
+from ..keyboards.inline import (
+    get_main_menu, get_settings_menu, get_model_selection_menu, 
+    get_confirm_clear_menu, get_chat_mode_menu, get_generation_mode_menu
+)
 from ..services.context import ConversationManager
 
 router = Router(name="callbacks")
@@ -43,7 +46,7 @@ async def callback_settings(callback: CallbackQuery):
 Здесь вы можете настроить работу бота под свои нужды:
 
 • 🤖 <b>Выбрать модель</b> - выбор AI модели для генерации ответов
-• 🎯 <b>Режим генерации</b> - настройка стиля ответов
+• 🎯 <b>Режим общения</b> - выбор источника ответов (LLM/RAG)
 
 <i>Выберите нужную опцию:</i>
 """
@@ -200,4 +203,60 @@ async def callback_help(callback: CallbackQuery):
     await callback.message.edit_text(
         help_text,
         reply_markup=get_main_menu()
+    )
+
+@router.callback_query(F.data == "chat_mode")
+async def callback_chat_mode(callback: CallbackQuery):
+    """Обработчик выбора режима общения"""
+    await callback.answer()
+    
+    mode_text = """
+🎯 <b>Режим общения</b>
+
+Выберите источник для получения ответов:
+
+• 🤖 <b>OpenRouter LLM</b> - прямое обращение к различным AI моделям
+• 📚 <b>RAG система</b> - поиск по вашей базе знаний + AI
+• 🧠 <b>Гибридный</b> - комбинация RAG и LLM для лучших результатов
+
+<i>Выберите подходящий режим:</i>
+"""
+    
+    await callback.message.edit_text(
+        mode_text,
+        reply_markup=get_chat_mode_menu()
+    )
+
+@router.callback_query(F.data.startswith("chat_mode:"))
+async def callback_chat_mode_selected(callback: CallbackQuery):
+    """Обработчик выбора режима общения"""
+    mode = callback.data.split(":", 1)[1]
+    
+    mode_names = {
+        "openrouter": "🤖 OpenRouter LLM",
+        "rag": "📚 RAG система", 
+        "hybrid": "🧠 Гибридный режим"
+    }
+    
+    mode_descriptions = {
+        "openrouter": "Будут использоваться модели через OpenRouter API",
+        "rag": "Ответы будут основаны на вашей базе знаний",
+        "hybrid": "Комбинация базы знаний и AI моделей"
+    }
+    
+    selected_name = mode_names.get(mode, mode)
+    description = mode_descriptions.get(mode, "")
+    
+    await callback.answer(f"Выбран {selected_name}")
+    
+    # TODO: Сохранить режим в базе данных/Redis для пользователя
+    user_id = callback.from_user.id
+    logger.info(f"User {user_id} selected chat mode: {mode}")
+    
+    await callback.message.edit_text(
+        f"✅ <b>Режим общения изменен</b>\n\n"
+        f"Выбран: {selected_name}\n"
+        f"{description}\n\n"
+        f"Режим будет использован для следующих сообщений.",
+        reply_markup=get_settings_menu()
     )

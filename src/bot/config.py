@@ -33,6 +33,11 @@ class Settings(BaseSettings):
     sentry_dsn: Optional[str] = None
     metrics_port: int = 8000
     
+    # External Services
+    rag_service_url: Optional[str] = None
+    rag_service_api_key: Optional[SecretStr] = None
+    external_services_timeout: int = 30
+    
     # Development
     environment: str = "development"
     debug: bool = False

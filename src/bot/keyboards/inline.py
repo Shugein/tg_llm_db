@@ -24,7 +24,7 @@ def get_settings_menu() -> InlineKeyboardMarkup:
         InlineKeyboardButton(text="🤖 Выбрать модель", callback_data="select_model")
     )
     builder.row(
-        InlineKeyboardButton(text="🎯 Режим генерации", callback_data="generation_mode")
+        InlineKeyboardButton(text="🎯 Режим общения", callback_data="chat_mode")
     )
     builder.row(
         InlineKeyboardButton(text="🔙 Назад", callback_data="main_menu")
@@ -59,15 +59,36 @@ def get_model_selection_menu() -> InlineKeyboardMarkup:
     
     return builder.as_markup()
 
-def get_generation_mode_menu() -> InlineKeyboardMarkup:
-    """Меню режимов генерации"""
+def get_chat_mode_menu() -> InlineKeyboardMarkup:
+    """Меню режимов общения"""
     builder = InlineKeyboardBuilder()
     
     modes = [
-        ("💬 Обычный", "mode:normal"),
-        ("🎨 Креативный", "mode:creative"),
-        ("🔬 Технический", "mode:technical"),
-        ("📝 Помощник", "mode:assistant")
+        ("🤖 OpenRouter LLM", "chat_mode:openrouter"),
+        ("📚 RAG система", "chat_mode:rag"),
+        ("🧠 Гибридный", "chat_mode:hybrid")
+    ]
+    
+    for name, callback in modes:
+        builder.row(
+            InlineKeyboardButton(text=name, callback_data=callback)
+        )
+    
+    builder.row(
+        InlineKeyboardButton(text="🔙 Назад", callback_data="settings")
+    )
+    
+    return builder.as_markup()
+
+def get_generation_mode_menu() -> InlineKeyboardMarkup:
+    """Меню режимов генерации для OpenRouter"""
+    builder = InlineKeyboardBuilder()
+    
+    modes = [
+        ("💬 Обычный", "gen_mode:normal"),
+        ("🎨 Креативный", "gen_mode:creative"),
+        ("🔬 Технический", "gen_mode:technical"),
+        ("📝 Помощник", "gen_mode:assistant")
     ]
     
     for name, callback in modes:
